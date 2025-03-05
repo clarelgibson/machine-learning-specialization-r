@@ -1,8 +1,5 @@
-# SDG Template
-Template repo for @surreydatagirl data viz/analytics projects. Template includes directories for data and R scripts. Other standard directories you may need include:
--  `ref`: for any reference documentation
--  `img`: for image files
--  `products`: for any products built with the clean data
+# Machine Learning in R
+This repository contains worked examples in R of the machine learning algorithms covered in Andrew Ng's [Machine Learning Specialization](https://www.coursera.org/specializations/machine-learning-introduction) available on [Coursera](https://www.coursera.org).
 
 ## Description
 Longer description of the project.
