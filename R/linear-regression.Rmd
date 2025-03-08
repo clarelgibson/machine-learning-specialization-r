@@ -31,6 +31,10 @@ library(tidyverse)
 library(here)
 ```
 
-
 ## Data
-For this exercise I use the diamonds dataset that is provided with 
+For this exercise I use the diamonds dataset that is provided with the `ggplot2` package. This is a dataset containing the prices and other attributes of over 50,000 round cut diamonds. Since I have already loaded the `ggplot2` package (it is part of the `tidyverse` package), I can access the diamonds dataset by simply calling `diamonds`.
+
+```{r show-diamonds-data}
+diamonds
+```
+
