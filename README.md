@@ -10,7 +10,7 @@ In February 2025 I enrolled into the Machine Learning Specialization on Coursera
 
 ## Algorithms
 
-- [Linear regression](https://github.com/clarelgibson/machine-learning-specialization-r/blob/e658dee3e405247a0e3c58651fe441a5096c9e28/R/linear-regression.md)
+- [Linear regression](R/linear-regression.md)
 
 ## Author
 
