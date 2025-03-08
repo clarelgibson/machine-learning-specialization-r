@@ -7,6 +7,7 @@ output:
   github_document:
     toc: true
     toc_depth: 2
+    fig_width: 10
 ---
 
 ```{r setup, include=FALSE}
@@ -38,3 +39,29 @@ For this exercise I use the diamonds dataset that is provided with the `ggplot2`
 diamonds
 ```
 
+# Exploratory analysis
+For this exercise, I will investigate whether I can predict the price of a diamond using one or more features. To start with, I will check if any of the observations have missing values. If so, they will need to be removed.
+
+```{r count-missing-values}
+sum(is.na(diamonds))
+```
+
+Next, I will generate a series of plots to show the relationships between the `price` variable and other variables in the dataset[^1].
+
+[^1]: Thanks to [this article](https://drsimonj.svbtle.com/plot-some-variables-against-many-others) for helping me to achieve this plot.
+
+```{r plot-price}
+# Plot the price variable against all other numerical variables
+diamonds |> 
+  pivot_longer(
+    c(carat, depth, table, x, y, z),
+    names_to = "var",
+    values_to = "value"
+  ) |> 
+  ggplot(aes(x = value, y = price, color = cut)) +
+    geom_point() +
+    facet_wrap(~ var, scales = "free") +
+    theme_bw()
+```
+
+From this plot, it appears that `price` has a positive linear relationship with `carat`, `x`, `y` and `z`.

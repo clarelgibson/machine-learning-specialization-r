@@ -6,6 +6,7 @@ Clare Gibson
 - [Introduction](#introduction)
   - [Packages](#packages)
   - [Data](#data)
+- [Getting started](#getting-started)
 
 # Introduction
 
@@ -55,3 +56,30 @@ diamonds
     ##  9  0.22 Fair      E     VS2      65.1    61   337  3.87  3.78  2.49
     ## 10  0.23 Very Good H     VS1      59.4    61   338  4     4.05  2.39
     ## # ℹ 53,930 more rows
+
+# Getting started
+
+For this exercise, I will investigate whether I can predict the price of
+a diamond using one or more features. To start with, I will generate a
+series of plots to show the relationships between the `price` variable
+and other variables in the dataset[^1].
+
+``` r
+# Plot the price variable against all other numerical variables
+diamonds |> 
+  pivot_longer(
+    c(carat, depth, table, x, y, z),
+    names_to = "var",
+    values_to = "value"
+  ) |> 
+  ggplot(aes(x = value, y = price, color = cut)) +
+    geom_point() +
+    facet_wrap(~ var, scales = "free") +
+    theme_bw()
+```
+
+<img src="linear-regression_files/figure-gfm/plot-price-1.png" style="display: block; margin: auto;" />
+
+[^1]: Thanks to [this
+    article](https://drsimonj.svbtle.com/plot-some-variables-against-many-others)
+    for helping me to achieve this plot.
