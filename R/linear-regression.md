@@ -1,0 +1,34 @@
+Linear Regression
+================
+Clare Gibson
+08 March 2025
+
+- [Introduction](#introduction)
+  - [Packages](#packages)
+  - [Data](#data)
+
+# Introduction
+
+In this notebook, I work through the steps of linear regression as
+taught in the [Machine Learning
+Specialization](https://www.coursera.org/specializations/machine-learning-introduction)
+available through [Coursera](https://coursera.org).
+
+## Packages
+
+I aim to write out most of the functions and calculations needed for
+linear regression using base or tidyverse-flavoured R, and not by using
+the specific machine learning packages that are available. However, I
+will make use of a number of R packages for data wrangling and plotting.
+These are all contained within the `tidyverse` wrapper. I also use a few
+other helpful packages as listed in the code below.
+
+``` r
+# Load packages
+library(tidyverse)
+library(here)
+```
+
+## Data
+
+For this exercise I use the diamonds dataset that is provided with
