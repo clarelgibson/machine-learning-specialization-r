@@ -1,12 +1,15 @@
 Linear Regression
 ================
 Clare Gibson
-08 March 2025
+09 March 2025
 
 - [Introduction](#introduction)
   - [Packages](#packages)
   - [Data](#data)
-- [Getting started](#getting-started)
+- [Exploratory analysis](#exploratory-analysis)
+  - [Train and test data](#train-and-test-data)
+- [Univariate linear regression](#univariate-linear-regression)
+  - [Variables and parameters](#variables-and-parameters)
 
 # Introduction
 
@@ -57,12 +60,22 @@ diamonds
     ## 10  0.23 Very Good H     VS1      59.4    61   338  4     4.05  2.39
     ## # ℹ 53,930 more rows
 
-# Getting started
+# Exploratory analysis
 
 For this exercise, I will investigate whether I can predict the price of
-a diamond using one or more features. To start with, I will generate a
-series of plots to show the relationships between the `price` variable
-and other variables in the dataset[^1].
+a diamond using one or more features. To start with, I will check if any
+of the observations have missing values. If so, they will need to be
+removed.
+
+``` r
+sum(is.na(diamonds))
+```
+
+    ## [1] 0
+
+This dataset has no missing values so no need to remove any rows. Next,
+I will generate a series of plots to show the relationships between the
+`price` variable and other variables in the dataset[^1].
 
 ``` r
 # Plot the price variable against all other numerical variables
@@ -79,6 +92,44 @@ diamonds |>
 ```
 
 <img src="linear-regression_files/figure-gfm/plot-price-1.png" style="display: block; margin: auto;" />
+
+From this plot, it appears that `price` has a positive linear
+relationship with `carat`, `x`, `y` and `z`.
+
+## Train and test data
+
+I will extract 80% of the dataset to use as training data and the
+remaining 20% will be the test data. In order to do this, I need to
+assign a unique ID to each row, then randomly select 80% of the rows
+using the `slice()` function. Using the row IDs, I can then find the
+remaining 20% to put into the test dataset.
+
+``` r
+# Add a unique ID to diamonds
+df <- diamonds |> 
+  rowid_to_column()
+
+# Create training dataset
+train <- df |> 
+  slice_sample(prop = 0.8) |> 
+  arrange(rowid)
+
+# Create testing dataset
+test <- df |> 
+  filter(!rowid %in% train$rowid) |> 
+  arrange(rowid)
+```
+
+# Univariate linear regression
+
+Univariate linear regression uses a single feature $x$ to predict a
+value $y$. In this example, I will try to predict the price of a diamond
+from its carat value.
+
+## Variables and parameters
+
+- $x$ = carat
+- $y$ = price
 
 [^1]: Thanks to [this
     article](https://drsimonj.svbtle.com/plot-some-variables-against-many-others)
