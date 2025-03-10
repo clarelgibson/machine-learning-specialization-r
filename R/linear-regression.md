@@ -122,17 +122,15 @@ test <- df |>
 
 # Univariate linear regression
 
-Univariate linear regression uses a single feature
-![x](https://latex.codecogs.com/png.latex?x "x") to predict a value
-![y](https://latex.codecogs.com/png.latex?y "y"). In this example, I
-will try to predict the price of a diamond from its carat value.
+Univariate linear regression uses a single feature $x$ to predict a
+value $y$. In this example, I will try to predict the price of a diamond
+from its carat value.
 
 ## Variables and parameters
 
-- ![x](https://latex.codecogs.com/png.latex?x "x") = carat
-- ![y](https://latex.codecogs.com/png.latex?y "y") = price
-- ![w,b](https://latex.codecogs.com/png.latex?w%2Cb "w,b") = the
-  parameters of the linear regression model
+- $x$ = carat
+- $y$ = price
+- $w,b$ = the parameters of the linear regression model
 
 The code below loads the data into variables `x_train` and `y_train`.
 
@@ -141,14 +139,14 @@ x_train <- train$carat
 head(x_train)
 ```
 
-    ## [1] 0.23 0.21 0.23 0.31 0.24 0.24
+    ## [1] 0.23 0.23 0.29 0.31 0.24 0.24
 
 ``` r
 y_train <- train$price
 head(y_train)
 ```
 
-    ## [1] 326 326 327 335 336 336
+    ## [1] 326 327 334 335 336 336
 
 [^1]: Thanks to [this
     article](https://drsimonj.svbtle.com/plot-some-variables-against-many-others)

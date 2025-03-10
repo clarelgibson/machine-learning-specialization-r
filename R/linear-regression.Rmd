@@ -8,7 +8,7 @@ output:
     toc: true
     toc_depth: 2
     fig_width: 10
-    pandoc_args: --webtex
+    pandoc_args: --mathjax
 ---
 
 ```{r setup, include=FALSE}
