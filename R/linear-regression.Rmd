@@ -8,6 +8,7 @@ output:
     toc: true
     toc_depth: 2
     fig_width: 10
+    pandoc_args: --webtex
 ---
 
 ```{r setup, include=FALSE}
@@ -94,3 +95,15 @@ Univariate linear regression uses a single feature $x$ to predict a value $y$. I
 
 - $x$ = carat
 - $y$ = price
+- $w,b$ = the parameters of the linear regression model
+
+The code below loads the data into variables `x_train` and `y_train`.
+
+```{r create-x-and-y-train}
+x_train <- train$carat
+head(x_train)
+
+y_train <- train$price
+head(y_train)
+```
+
