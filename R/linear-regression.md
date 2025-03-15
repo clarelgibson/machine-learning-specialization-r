@@ -7,9 +7,14 @@ Clare Gibson
   - [Packages](#packages)
   - [Data](#data)
 - [Exploratory analysis](#exploratory-analysis)
-  - [Train and test data](#train-and-test-data)
+  - [Check for missing data](#check-for-missing-data)
+  - [Plot relationships](#plot-relationships)
+  - [Set train and test data](#set-train-and-test-data)
 - [Univariate linear regression](#univariate-linear-regression)
-  - [Variables and parameters](#variables-and-parameters)
+  - [Steps for regression](#steps-for-regression)
+  - [Create `x_train` and `y_train`](#create-x_train-and-y_train)
+  - [Visualise the data](#visualise-the-data)
+  - [Compute cost](#compute-cost)
 
 # Introduction
 
@@ -30,7 +35,7 @@ other helpful packages as listed in the code below.
 ``` r
 # Load packages
 library(tidyverse)
-library(here)
+library(skimr)   # for viewing summary statistics
 ```
 
 ## Data
@@ -63,9 +68,12 @@ diamonds
 # Exploratory analysis
 
 For this exercise, I will investigate whether I can predict the price of
-a diamond using one or more features. To start with, I will check if any
-of the observations have missing values. If so, they will need to be
-removed.
+a diamond using one or more features.
+
+## Check for missing data
+
+To start with, I will check if any of the observations have missing
+values. If so, they will need to be removed.
 
 ``` r
 sum(is.na(diamonds))
@@ -73,9 +81,12 @@ sum(is.na(diamonds))
 
     ## [1] 0
 
-This dataset has no missing values so no need to remove any rows. Next,
-I will generate a series of plots to show the relationships between the
-`price` variable and other variables in the dataset[^1].
+This dataset has no missing values so no need to remove any rows.
+
+## Plot relationships
+
+Next, I will generate a series of plots to show the relationships
+between the `price` variable and other variables in the dataset[^1].
 
 ``` r
 # Plot the price variable against all other numerical variables
@@ -96,7 +107,7 @@ diamonds |>
 From this plot, it appears that `price` has a positive linear
 relationship with `carat`, `x`, `y` and `z`.
 
-## Train and test data
+## Set train and test data
 
 I will extract 80% of the dataset to use as training data and the
 remaining 20% will be the test data. In order to do this, I need to
@@ -126,27 +137,109 @@ Univariate linear regression uses a single feature $x$ to predict a
 value $y$. In this example, I will try to predict the price of a diamond
 from its carat value.
 
-## Variables and parameters
+## Steps for regression
 
-- $x$ = carat
-- $y$ = price
-- $w,b$ = the parameters of the linear regression model
+The model function for univariate linear regression is represented as:
+$$
+f_{w,b}(x)=wx+b
+$$
 
-The code below loads the data into variables `x_train` and `y_train`.
+where: - $x$ = carat - $y$ = price - $w,b$ = the parameters of the
+linear regression model
+
+To train the linear regression model I want to find the best $(w,b)$
+parameters that fit my dataset. I can evaluate how well a choice of
+$(w,b)$ fits the data by using the cost function $J(w,b)$.
+
+To find the values $(w,b)$ that gets the smallest possible cost
+$J(w,b)$, I will use a method called gradient descent.
+
+## Create `x_train` and `y_train`
+
+The code below loads the data into variables `x_train` and `y_train` and
+displays summary statistics about each.
 
 ``` r
 x_train <- train$carat
 head(x_train)
 ```
 
-    ## [1] 0.23 0.23 0.29 0.31 0.24 0.24
+    ## [1] 0.21 0.29 0.31 0.24 0.24 0.26
+
+``` r
+skim(x_train)
+```
+
+|                                                  |         |
+|:-------------------------------------------------|:--------|
+| Name                                             | x_train |
+| Number of rows                                   | 43152   |
+| Number of columns                                | 1       |
+| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_   |         |
+| Column type frequency:                           |         |
+| numeric                                          | 1       |
+| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |         |
+| Group variables                                  | None    |
+
+Data summary
+
+**Variable type: numeric**
+
+| skim_variable | n_missing | complete_rate | mean |   sd |  p0 | p25 | p50 |  p75 | p100 | hist  |
+|:--------------|----------:|--------------:|-----:|-----:|----:|----:|----:|-----:|-----:|:------|
+| data          |         0 |             1 |  0.8 | 0.48 | 0.2 | 0.4 | 0.7 | 1.04 | 5.01 | ▇▂▁▁▁ |
 
 ``` r
 y_train <- train$price
 head(y_train)
 ```
 
-    ## [1] 326 327 334 335 336 336
+    ## [1] 326 334 335 336 336 337
+
+``` r
+skim(y_train)
+```
+
+|                                                  |         |
+|:-------------------------------------------------|:--------|
+| Name                                             | y_train |
+| Number of rows                                   | 43152   |
+| Number of columns                                | 1       |
+| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_   |         |
+| Column type frequency:                           |         |
+| numeric                                          | 1       |
+| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |         |
+| Group variables                                  | None    |
+
+Data summary
+
+**Variable type: numeric**
+
+| skim_variable | n_missing | complete_rate | mean | sd | p0 | p25 | p50 | p75 | p100 | hist |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|
+| data | 0 | 1 | 3932.98 | 4000.24 | 326 | 948 | 2396 | 5324 | 18823 | ▇▂▁▁▁ |
+
+My dataset has data points.
+
+## Visualise the data
+
+Earlier I explored the relationships between price and all other
+variables. Here I look at the relationship between the data points in my
+training data only.
+
+``` r
+train |> 
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(color = "#FF4F5C") +
+  theme_bw()
+```
+
+<img src="linear-regression_files/figure-gfm/view-scatter-training-data-univariate-1.png" style="display: block; margin: auto;" />
+
+From the chart I can see that as carat increase so does price. Neither
+carat nor price ever go below 0.
+
+## Compute cost
 
 [^1]: Thanks to [this
     article](https://drsimonj.svbtle.com/plot-some-variables-against-many-others)

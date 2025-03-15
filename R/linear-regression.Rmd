@@ -30,7 +30,11 @@ I aim to write out most of the functions and calculations needed for linear regr
 ```{r load-packages}
 # Load packages
 library(tidyverse)
-library(here)
+library(skimr)   # for viewing summary statistics
+library(here)    # for file location
+
+# Load custom functions
+source(here("R/utils.R"))
 ```
 
 ## Data
@@ -41,24 +45,30 @@ diamonds
 ```
 
 # Exploratory analysis
-For this exercise, I will investigate whether I can predict the price of a diamond using one or more features. To start with, I will check if any of the observations have missing values. If so, they will need to be removed.
+For this exercise, I will investigate whether I can predict the price of a diamond using one or more features.
+
+## Check for missing data
+To start with, I will check if any of the observations have missing values. If so, they will need to be removed.
 
 ```{r count-missing-values}
 sum(is.na(diamonds))
 ```
 
-This dataset has no missing values so no need to remove any rows. Next, I will generate a series of plots to show the relationships between the `price` variable and other variables in the dataset[^1].
+This dataset has no missing values so no need to remove any rows.
+
+## Plot relationships
+Next, I will generate a series of plots to show the relationships between the `price` variable and other variables in the dataset[^1].
 
 [^1]: Thanks to [this article](https://drsimonj.svbtle.com/plot-some-variables-against-many-others) for helping me to achieve this plot.
 
 ```{r plot-price}
 # Plot the price variable against all other numerical variables
-diamonds |> 
+diamonds |>
   pivot_longer(
     c(carat, depth, table, x, y, z),
     names_to = "var",
     values_to = "value"
-  ) |> 
+  ) |>
   ggplot(aes(x = value, y = price, color = cut)) +
     geom_point() +
     facet_wrap(~ var, scales = "free") +
@@ -67,7 +77,7 @@ diamonds |>
 
 From this plot, it appears that `price` has a positive linear relationship with `carat`, `x`, `y` and `z`.
 
-## Train and test data
+## Set train and test data
 
 I will extract 80% of the dataset to use as training data and the remaining 20% will be the test data. In order to do this, I need to assign a unique ID to each row, then randomly select 80% of the rows using the `slice()` function. Using the row IDs, I can then find the remaining 20% to put into the test dataset.
 
@@ -87,23 +97,124 @@ test <- df |>
   arrange(rowid)
 ```
 
-# Univariate linear regression
+# Linear regression
 
-Univariate linear regression uses a single feature $x$ to predict a value $y$. In this example, I will try to predict the price of a diamond from its carat value.
+Linear regression uses one or more features $\vec{x}$ to predict a value $y$. In this example, I will try to predict the price of a diamond from its carat value.
 
-## Variables and parameters
+## Steps for regression
+The model function for univariate linear regression is represented as:
+$$
+f_{\vec{w},b}(x)=wx+b
+$$
+
+where:
 
 - $x$ = carat
 - $y$ = price
 - $w,b$ = the parameters of the linear regression model
 
-The code below loads the data into variables `x_train` and `y_train`.
+To train the linear regression model I want to find the best $(w,b)$ parameters that fit my dataset. I can evaluate how well a choice of $(w,b)$ fits the data by using the cost function $J(w,b)$.
 
-```{r create-x-and-y-train}
-x_train <- train$carat
+To find the values $(w,b)$ that gets the smallest possible cost $J(w,b)$, I will use a method called gradient descent. 
+
+## Create `x_train` and `y_train`
+The code below loads the data into variables `x_train` and `y_train` and displays summary statistics about each.
+
+```{r create-x-and-y-train-for-univariate}
+x_train <- train |> 
+  select(carat) |> 
+  as.matrix()
+
 head(x_train)
+skim(x_train)
 
-y_train <- train$price
+y_train <- train |> 
+  select(price) |> 
+  as.matrix()
+
 head(y_train)
+skim(y_train)
+```
+
+My dataset has `r nrow(x_train)` data points.
+
+## Visualise the data
+
+Earlier I explored the relationships between price and all other variables. Here I look at the relationship between the data points in my training data only.
+
+```{r view-scatter-training-data-univariate}
+train |> 
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(color = "#FF4F5C") +
+  theme_bw()
+```
+
+From the chart I can see that as carat increase so does price. Neither carat nor price ever go below 0.
+
+## Compute cost
+In order to find the best values for $w$ and $b$ I need to try a lot of different values and calculate the cost of each attempt. Then using gradient descent I can obtain the optimal set of paramters to use in the linear regression function.
+
+The cost function is defined mathematically as:
+
+$$J(w,b)=\frac{1}{2m}\sum_{i=1}^{m}{(f_{w,b}(x^{(i)})-y^{(i)})^{2}}$$
+
+```{r compute-cost}
+# Try some starting variables
+initial_w <- 0.2
+initial_b <- -0.5
+
+cost <- compute_cost(x_train, y_train, initial_w, initial_b)
+print(class(cost))
+paste0("Cost at initial w,b: ", cost)
+```
+
+## Compute gradient
+The formulas to compute the gradients with respect to $w$ and $b$ are:
+$$
+\frac{\partial J(w,b)}{\partial b}  = \frac{1}{m} \sum\limits_{i = 0}^{m-1} (f_{w,b}(x^{(i)}) - y^{(i)})
+$$
+
+and
+
+$$
+\frac{\partial J(w,b)}{\partial w}  = \frac{1}{m} \sum\limits_{i = 0}^{m-1} (f_{w,b}(x^{(i)}) -y^{(i)})x^{(i)}
+$$
+
+## Gradient descent
+In the next code cell I use the gradient descent function.
+
+```{r gradient-descent}
+# initialise parameters
+initial_w <- matrix(0.0,,dim(x_train)[2])
+initial_b <- 0.0
+iterations <- 1000
+alpha <- 5.0e-7
+
+# run gradient descent
+grad_desc_list <- gradient_descent(
+  x = x_train,
+  y = y_train,
+  w_in = initial_w,
+  b_in = initial_b,
+  cost_function = compute_cost,
+  gradient_function = compute_gradient,
+  alpha = alpha,
+  num_iters = iterations
+)
+```
+
+I can view how the gradient descent is performing by plotting the cost history by iteration.
+
+```{r plot-gradient-descent}
+# create a df containing iteration and cost history
+j_hist <- tibble(
+  iteration = grad_desc_list$iteration,
+  cost = grad_desc_list$j_hist
+)
+
+# plot the cost values
+j_hist |> 
+  ggplot(aes(x = iteration, y = cost)) +
+  geom_line()
 ```
 
