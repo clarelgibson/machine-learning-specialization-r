@@ -26,3 +26,4 @@ This project is licensed under the CC0 1.0 Universal licence. See the [LICENSE](
 - [Coursera](https://coursera.org)
 - [DeepLearning.ai](https://deeplearning.ai)
 - [Column Standard Deviation in R](https://stackoverflow.com/questions/18047896/column-standard-deviation-r)
+- [Plotting relationships between variables](https://drsimonj.svbtle.com/plot-some-variables-against-many-others)

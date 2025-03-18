@@ -45,7 +45,7 @@ diamonds
 ```
 
 # Exploratory analysis
-For this exercise, I will investigate whether I can predict the price of a diamond using one or more features.
+For this exercise, I will investigate whether I can predict the price of a diamond using several features.
 
 ## Check for missing data
 To start with, I will check if any of the observations have missing values. If so, they will need to be removed.
@@ -97,32 +97,33 @@ test <- df |>
   arrange(rowid)
 ```
 
-# Linear regression
+# Prepare data
 
-Linear regression uses one or more features $\vec{x}$ to predict a value $y$. In this example, I will try to predict the price of a diamond from its carat value.
+Linear regression uses one or more features $\vec{x}$ to predict a value $y$. In this example, I will try to predict the price of a diamond from its features of `carat`, `x`, `y` and `z`.
 
 ## Steps for regression
-The model function for univariate linear regression is represented as:
+The model function for linear regression is represented as:
+
 $$
-f_{\vec{w},b}(x)=wx+b
+f_{\vec{w},b}(\vec{x})=\vec{w}\cdot\vec{x}+b
 $$
 
 where:
 
-- $x$ = carat
+- $\vec{x}$ = [carat, x, y, z]
 - $y$ = price
-- $w,b$ = the parameters of the linear regression model
+- $\vec{w},b$ = the parameters of the linear regression model
 
-To train the linear regression model I want to find the best $(w,b)$ parameters that fit my dataset. I can evaluate how well a choice of $(w,b)$ fits the data by using the cost function $J(w,b)$.
+To train the linear regression model I want to find the best $\vec{w},b$ parameters that fit my dataset. I can evaluate how well a choice of $\vec{w},b$ fits the data by using the cost function $J(\vec{w},b)$.
 
-To find the values $(w,b)$ that gets the smallest possible cost $J(w,b)$, I will use a method called gradient descent. 
+To find the values $\vec{w},b$ that gets the smallest possible cost $J(\vec{w},b)$, I will use a method called gradient descent. 
 
 ## Create `x_train` and `y_train`
 The code below loads the data into variables `x_train` and `y_train` and displays summary statistics about each.
 
 ```{r create-x-and-y-train-for-univariate}
 x_train <- train |> 
-  select(carat) |> 
+  select(carat, x, y, z) |> 
   as.matrix()
 
 head(x_train)
@@ -138,18 +139,17 @@ skim(y_train)
 
 My dataset has `r nrow(x_train)` data points.
 
-## Visualise the data
+## Scale the `x_train` data
+The features I am using for this regression exercise have different ranges.
 
-Earlier I explored the relationships between price and all other variables. Here I look at the relationship between the data points in my training data only.
+To optimize my linear regression function I will scale the features so that they all fall within similar ranges.
 
-```{r view-scatter-training-data-univariate}
-train |> 
-  ggplot(aes(x = carat, y = price)) +
-  geom_point(color = "#FF4F5C") +
-  theme_bw()
+```{r scale features}
+# Zscore feature scaling
+x_train_scaled <- scale(x_train)
 ```
 
-From the chart I can see that as carat increase so does price. Neither carat nor price ever go below 0.
+# Regression
 
 ## Compute cost
 In order to find the best values for $w$ and $b$ I need to try a lot of different values and calculate the cost of each attempt. Then using gradient descent I can obtain the optimal set of paramters to use in the linear regression function.
@@ -163,7 +163,7 @@ $$J(w,b)=\frac{1}{2m}\sum_{i=1}^{m}{(f_{w,b}(x^{(i)})-y^{(i)})^{2}}$$
 initial_w <- 0.2
 initial_b <- -0.5
 
-cost <- compute_cost(x_train, y_train, initial_w, initial_b)
+cost <- compute_cost(x_train_scaled, y_train, initial_w, initial_b)
 print(class(cost))
 paste0("Cost at initial w,b: ", cost)
 ```
@@ -185,14 +185,16 @@ In the next code cell I use the gradient descent function.
 
 ```{r gradient-descent}
 # initialise parameters
-initial_w <- matrix(0.0,,dim(x_train)[2])
+initial_w <- matrix(0.0,,dim(x_train_scaled)[2])
 initial_b <- 0.0
-iterations <- 1000
-alpha <- 5.0e-7
+iterations <- 100
+alpha <- 1.0e-1
 
 # run gradient descent
+# add this code to measure the time elapsed
+start <- Sys.time()
 grad_desc_list <- gradient_descent(
-  x = x_train,
+  x = x_train_scaled,
   y = y_train,
   w_in = initial_w,
   b_in = initial_b,
@@ -201,6 +203,7 @@ grad_desc_list <- gradient_descent(
   alpha = alpha,
   num_iters = iterations
 )
+print(Sys.time() - start)
 ```
 
 I can view how the gradient descent is performing by plotting the cost history by iteration.
@@ -218,3 +221,7 @@ j_hist |>
   geom_line()
 ```
 
+# Prediction
+The goal of my regression is to be able to predict the price of a diamond. I will use the linear regression function I just created to predict the price of a diamond that is 0.75 carat and has x, y, z values of 5.0, 5.7, 3.2.
+
+First I need to normalize this test data then run it through tbe linear regression algorithm.

@@ -82,9 +82,3 @@ gradient_descent <- function(x, y, w_in, b_in, cost_function, gradient_function,
   }
   return(list(w = w, b = b, j_hist = j_hist, iteration = iteration))
 }
-
-# Z-Score normalise features ----------------------------------------------
-zscore_normalise_features <- function(x) {
-  
-}
-
