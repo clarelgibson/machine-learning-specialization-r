@@ -1,0 +1,44 @@
+---
+title: "Linear Regression Practice"
+author: "Clare Gibson"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  github_document:
+    toc: true
+    toc_depth: 2
+    fig_width: 10
+    pandoc_args: --mathjax
+---
+
+```{r setup, include=FALSE}
+# Knitr chunk options
+knitr::opts_chunk$set(
+	echo = TRUE,
+	fig.align = "center",
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+# Getting started
+
+To get started, we need to load the packages and data needed for this exercise.
+
+## Packages
+```{r load-packages}
+library(tidyverse)
+library(googlesheets4)
+```
+
+## Data
+```{r read-data}
+# Read in the toy data set
+gs4_deauth()
+
+data <- read_sheet(
+  ss = "19J8MjDPAZY8YPs5doJ3F6_pmUTsCQyNtms9q0pzrOuY",
+  sheet = "toy-data",
+  range = "A1:F31"
+)
+```
+
