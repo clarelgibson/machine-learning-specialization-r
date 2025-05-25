@@ -1,0 +1,86 @@
+---
+title: "Predict the cost of homes in California"
+author: "Clare Gibson"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+format:
+  gfm:
+    toc: true
+    toc-depth: 2
+---
+
+# Introduction
+
+This notebook trains a machine learning model that predicts home costs in California. The overall objective is to predict the value of home prices using **9 feature variables and 1 target variable**.
+
+## Packages
+
+The code chunk below loads all of the packages required for this exercise.
+
+```{r}
+#| label: load-packages
+#| warnings: false
+#| output: false
+
+# Load packages
+library(here)
+library(tidyverse)
+library(janitor)
+```
+
+## Data
+
+The data for this exercise is contained in a csv file `housing.csv`.
+
+```{r}
+#| label: load-data
+#| output: false
+
+# Read data into a data frame
+housing_df <- read_csv(here("data/src/housing.csv"))
+```
+
+# Exploratory analysis
+
+## Glimpse
+
+```{r}
+#| label: glimpse-data
+
+# Show column labels and data types
+glimpse(housing_df)
+```
+
+## Head
+
+```{r}
+#| label: head-data
+
+# Show the first few rows of the df
+head(housing_df)
+```
+
+## Summary
+
+```{r}
+#| label: summary-data
+
+# Show summary stats
+summary(housing_df)
+```
+
+# Process data
+
+## Missing data
+
+First we take a look at which columns have missing data that could skew the model.
+
+```{r}
+#| label: view-missing-data
+
+# Count NA values in each column
+housing_df |> 
+  summarise_all(~ sum(is.na(.))) |> 
+  pivot_longer(everything())
+```
+
+The only column that contains missing values is `total_bedrooms`. It is not possible for a housing unit to have null bedrooms. We should be able to impute a value for the observations that are missing by using the k-nearest neighbours approach.
